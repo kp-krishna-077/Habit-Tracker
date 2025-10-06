@@ -1,8 +1,9 @@
-import type { Habit, Completion, Achievement } from "@shared/schema";
+import type { Habit, Completion, Achievement, Todo } from "@shared/schema";
 
 const HABITS_KEY = "habit-tracker-habits";
 const COMPLETIONS_KEY = "habit-tracker-completions";
 const ACHIEVEMENTS_KEY = "habit-tracker-achievements";
+const TODOS_KEY = "habit-tracker-todos";
 
 export const localStorageService = {
   getHabits(): Habit[] {
@@ -30,5 +31,14 @@ export const localStorageService = {
 
   saveAchievements(achievements: Achievement[]): void {
     localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(achievements));
+  },
+
+  getTodos(): Todo[] {
+    const data = localStorage.getItem(TODOS_KEY);
+    return data ? JSON.parse(data) : [];
+  },
+
+  saveTodos(todos: Todo[]): void {
+    localStorage.setItem(TODOS_KEY, JSON.stringify(todos));
   },
 };
