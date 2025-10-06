@@ -26,6 +26,8 @@ function App() {
 
   useEffect(() => {
     const interval = setInterval(async () => {
+      if (Notification.permission !== "granted") return;
+
       const now = new Date();
       const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
       const currentDate = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
@@ -33,15 +35,8 @@ function App() {
       const habits = await storageService.getHabits();
       habits.forEach(habit => {
         if (habit.reminderTime === currentTime && habit.reminderDate === currentDate) {
-          fetch("/api/send-notification", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              title: "Habit Reminder",
-              body: `Don't forget to complete your habit: ${habit.title}`,
-            }),
+          new Notification("Habit Reminder", {
+            body: `Don't forget to complete your habit: ${habit.title}`,
           });
         }
       });
@@ -49,15 +44,8 @@ function App() {
       const todos = await storageService.getTodos();
       todos.forEach(todo => {
         if (todo.dueTime === currentTime && todo.dueDate === currentDate) {
-          fetch("/api/send-notification", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              title: "To-Do Reminder",
-              body: `Your task is due: ${todo.title}`,
-            }),
+          new Notification("To-Do Reminder", {
+            body: `Your task is due: ${todo.title}`,
           });
         }
       });

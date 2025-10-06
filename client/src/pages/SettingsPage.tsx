@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Trash2, Download, Upload, FileText, Bell } from "lucide-react";
 import { useState, useEffect } from "react";
-import { requestNotificationPermission } from "@/lib/notifications";
 import { storageService } from "@/lib/storage";
 import { exportHabitsToPDF } from "@/lib/pdfExport";
 import { useToast } from "@/hooks/use-toast";
@@ -123,8 +122,22 @@ export default function SettingsPage() {
 
   const toggleNotifications = async (checked: boolean) => {
     if (checked) {
-      const token = await requestNotificationPermission();
-      if (token) {
+      if (!("Notification" in window)) {
+        toast({
+          title: "Error",
+          description: "This browser does not support desktop notifications.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (Notification.permission === "denied") {
+        window.location.href = "appilix-permission://notification";
+        return;
+      }
+
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
         setNotificationsEnabled(true);
         toast({
           title: "Notifications enabled",
