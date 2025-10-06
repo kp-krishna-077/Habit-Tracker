@@ -24,6 +24,34 @@ function App() {
     loadTheme();
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const now = new Date();
+      const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+      const currentDate = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
+
+      const habits = await storageService.getHabits();
+      habits.forEach(habit => {
+        if (habit.reminderTime === currentTime && habit.reminderDate === currentDate) {
+          new Notification("Habit Reminder", {
+            body: `Don't forget to complete your habit: ${habit.title}`,
+          });
+        }
+      });
+
+      const todos = await storageService.getTodos();
+      todos.forEach(todo => {
+        if (todo.dueTime === currentTime && todo.dueDate === currentDate) {
+          new Notification("To-Do Reminder", {
+            body: `Your task is due: ${todo.title}`,
+          });
+        }
+      });
+    }, 60000); // Check every minute
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

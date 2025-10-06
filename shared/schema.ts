@@ -11,6 +11,8 @@ export const habitSchema = z.object({
   currentStreak: z.number().default(0),
   bestStreak: z.number().default(0),
   createdAt: z.string(),
+  reminderTime: z.string().optional(),
+  reminderDate: z.string().optional(),
 });
 
 export const insertHabitSchema = habitSchema.omit({

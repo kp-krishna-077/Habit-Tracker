@@ -10,11 +10,13 @@ import type { FrequencyType } from "@shared/schema";
 interface AddHabitDialogProps {
   open: boolean;
   onClose: () => void;
-  onSave: (title: string, description: string, frequencyType: FrequencyType, customDays?: number[]) => void;
+  onSave: (title: string, description: string, frequencyType: FrequencyType, customDays?: number[], reminderTime?: string, reminderDate?: string) => void;
   initialTitle?: string;
   initialDescription?: string;
   initialFrequencyType?: FrequencyType;
   initialCustomDays?: number[];
+  initialReminderTime?: string;
+  initialReminderDate?: string;
 }
 
 export default function AddHabitDialog({
@@ -25,11 +27,15 @@ export default function AddHabitDialog({
   initialDescription = "",
   initialFrequencyType = "daily",
   initialCustomDays = [],
+  initialReminderTime = "",
+  initialReminderDate = "",
 }: AddHabitDialogProps) {
   const [title, setTitle] = useState(initialTitle);
   const [description, setDescription] = useState(initialDescription);
   const [frequencyType, setFrequencyType] = useState<FrequencyType>(initialFrequencyType);
   const [customDays, setCustomDays] = useState<number[]>(initialCustomDays);
+  const [reminderTime, setReminderTime] = useState(initialReminderTime);
+  const [reminderDate, setReminderDate] = useState(initialReminderDate);
   
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   
@@ -41,11 +47,13 @@ export default function AddHabitDialog({
   
   const handleSave = () => {
     if (title.trim()) {
-      onSave(title, description, frequencyType, frequencyType === "custom" ? customDays : undefined);
+      onSave(title, description, frequencyType, frequencyType === "custom" ? customDays : undefined, reminderTime, reminderDate);
       setTitle("");
       setDescription("");
       setFrequencyType("daily");
       setCustomDays([]);
+      setReminderTime("");
+      setReminderDate("");
       onClose();
     }
   };
@@ -112,6 +120,27 @@ export default function AddHabitDialog({
               >
                 Custom
               </Button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="reminder-date">Reminder Date</Label>
+              <Input
+                id="reminder-date"
+                type="date"
+                value={reminderDate}
+                onChange={(e) => setReminderDate(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reminder-time">Reminder Time</Label>
+              <Input
+                id="reminder-time"
+                type="time"
+                value={reminderTime}
+                onChange={(e) => setReminderTime(e.target.value)}
+              />
             </div>
           </div>
           

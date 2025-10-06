@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Trash2, Download, Upload, FileText } from "lucide-react";
+import { Trash2, Download, Upload, FileText, Bell } from "lucide-react";
 import { useState, useEffect } from "react";
+import { requestNotificationPermission } from "@/lib/notifications";
 import { storageService } from "@/lib/storage";
 import { exportHabitsToPDF } from "@/lib/pdfExport";
 import { useToast } from "@/hooks/use-toast";
@@ -116,6 +117,22 @@ export default function SettingsPage() {
     setShowClearDialog(false);
   };
 
+  const handleEnableNotifications = async () => {
+    const token = await requestNotificationPermission();
+    if (token) {
+      toast({
+        title: "Notifications enabled",
+        description: "You will now receive notifications.",
+      });
+    } else {
+      toast({
+        title: "Notifications denied",
+        description: "You have denied permission for notifications.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="pb-20">
       <div className="sticky top-0 bg-background/95 backdrop-blur-lg border-b z-40">
@@ -142,6 +159,18 @@ export default function SettingsPage() {
               data-testid="switch-dark-mode"
             />
           </div>
+        </Card>
+
+        <Card className="p-4">
+          <h3 className="font-semibold mb-3">Notifications</h3>
+          <Button
+            variant="outline"
+            className="w-full justify-start"
+            onClick={handleEnableNotifications}
+          >
+            <Bell className="w-4 h-4 mr-2" />
+            Enable Push Notifications
+          </Button>
         </Card>
 
         <Card className="p-4">

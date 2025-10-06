@@ -96,13 +96,15 @@ export default function HabitsPage({ onTabChange }: HabitsPageProps) {
     }
   };
 
-  const addHabit = (title: string, description: string, frequencyType: FrequencyType, customDays?: number[]) => {
+  const addHabit = (title: string, description: string, frequencyType: FrequencyType, customDays?: number[], reminderTime?: string, reminderDate?: string) => {
     const newHabit: Habit = {
       id: Date.now().toString(),
       title,
       description,
       frequencyType,
       customDays,
+      reminderTime,
+      reminderDate,
       currentStreak: 0,
       bestStreak: 0,
       createdAt: new Date().toISOString(),
@@ -113,9 +115,9 @@ export default function HabitsPage({ onTabChange }: HabitsPageProps) {
     checkAchievements(updated, completions);
   };
 
-  const updateHabit = (id: string, title: string, description: string, frequencyType: FrequencyType, customDays?: number[]) => {
+  const updateHabit = (id: string, title: string, description: string, frequencyType: FrequencyType, customDays?: number[], reminderTime?: string, reminderDate?: string) => {
     const updated = habits.map(h =>
-      h.id === id ? { ...h, title, description, frequencyType, customDays } : h
+      h.id === id ? { ...h, title, description, frequencyType, customDays, reminderTime, reminderDate } : h
     );
     setHabits(updated);
     storageService.saveHabits(updated);
@@ -219,12 +221,12 @@ export default function HabitsPage({ onTabChange }: HabitsPageProps) {
     setDialogOpen(true);
   };
 
-  const handleDialogSave = (title: string, description: string, frequencyType: FrequencyType, customDays?: number[]) => {
+  const handleDialogSave = (title: string, description: string, frequencyType: FrequencyType, customDays?: number[], reminderTime?: string, reminderDate?: string) => {
     if (editingHabit) {
-      updateHabit(editingHabit.id, title, description, frequencyType, customDays);
+      updateHabit(editingHabit.id, title, description, frequencyType, customDays, reminderTime, reminderDate);
       setEditingHabit(null);
     } else {
-      addHabit(title, description, frequencyType, customDays);
+      addHabit(title, description, frequencyType, customDays, reminderTime, reminderDate);
     }
   };
 
@@ -328,6 +330,8 @@ export default function HabitsPage({ onTabChange }: HabitsPageProps) {
         initialDescription={editingHabit?.description}
         initialFrequencyType={editingHabit?.frequencyType}
         initialCustomDays={editingHabit?.customDays}
+        initialReminderTime={editingHabit?.reminderTime}
+        initialReminderDate={editingHabit?.reminderDate}
       />
 
       <ConfettiEffect show={showConfetti} onComplete={() => setShowConfetti(false)} />
