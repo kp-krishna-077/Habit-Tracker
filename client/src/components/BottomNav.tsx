@@ -1,4 +1,4 @@
-import { Home, Calendar, Trophy, Settings, ListTodo } from "lucide-react";
+import { Home, Calendar, Trophy, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
@@ -11,7 +11,6 @@ export default function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   const tabs = [
     { id: "habits", label: "Habits", icon: Home },
     { id: "calendar", label: "Calendar", icon: Calendar },
-    { id: "todo", label: "To-Do", icon: ListTodo },
     { id: "achievements", label: "Achievements", icon: Trophy },
     { id: "settings", label: "Settings", icon: Settings },
   ];
