@@ -12,12 +12,16 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function SettingsPage() {
   const [darkMode, setDarkMode] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     const isDark = document.documentElement.classList.contains("dark");
     setDarkMode(isDark);
+    if ("Notification" in window) {
+      setNotificationsEnabled(Notification.permission === "granted");
+    }
   }, []);
 
   const toggleDarkMode = (checked: boolean) => {
@@ -117,18 +121,29 @@ export default function SettingsPage() {
     setShowClearDialog(false);
   };
 
-  const handleEnableNotifications = async () => {
-    const token = await requestNotificationPermission();
-    if (token) {
-      toast({
-        title: "Notifications enabled",
-        description: "You will now receive notifications.",
-      });
+  const toggleNotifications = async (checked: boolean) => {
+    if (checked) {
+      const token = await requestNotificationPermission();
+      if (token) {
+        setNotificationsEnabled(true);
+        toast({
+          title: "Notifications enabled",
+          description: "You will now receive notifications.",
+        });
+      } else {
+        setNotificationsEnabled(false);
+        toast({
+          title: "Notifications denied",
+          description: "You have denied permission for notifications.",
+          variant: "destructive",
+        });
+      }
     } else {
+      // In a real app, you would unsubscribe the user here.
+      setNotificationsEnabled(false);
       toast({
-        title: "Notifications denied",
-        description: "You have denied permission for notifications.",
-        variant: "destructive",
+        title: "Notifications disabled",
+        description: "You will no longer receive notifications.",
       });
     }
   };
@@ -162,15 +177,21 @@ export default function SettingsPage() {
         </Card>
 
         <Card className="p-4">
-          <h3 className="font-semibold mb-3">Notifications</h3>
-          <Button
-            variant="outline"
-            className="w-full justify-start"
-            onClick={handleEnableNotifications}
-          >
-            <Bell className="w-4 h-4 mr-2" />
-            Enable Push Notifications
-          </Button>
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="notifications-mode" className="text-base font-semibold">
+                Enable Notifications
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Receive reminders for your habits and to-dos
+              </p>
+            </div>
+            <Switch
+              id="notifications-mode"
+              checked={notificationsEnabled}
+              onCheckedChange={toggleNotifications}
+            />
+          </div>
         </Card>
 
         <Card className="p-4">
