@@ -6,7 +6,7 @@ import AddHabitDialog from "@/components/AddHabitDialog";
 import EmptyState from "@/components/EmptyState";
 import ConfettiEffect from "@/components/ConfettiEffect";
 import AchievementUnlockModal from "@/components/AchievementUnlockModal";
-import { localStorageService } from "@/lib/storage";
+import { storageService } from "@/lib/storage";
 import { INITIAL_ACHIEVEMENTS } from "@/lib/achievements";
 import type { Habit, Completion, Achievement, FrequencyType } from "@shared/schema";
 import { format, startOfDay, isSameDay } from "date-fns";
@@ -26,18 +26,22 @@ export default function HabitsPage({ onTabChange }: HabitsPageProps) {
   const [unlockedAchievement, setUnlockedAchievement] = useState<Achievement | null>(null);
 
   useEffect(() => {
-    const savedHabits = localStorageService.getHabits();
-    const savedCompletions = localStorageService.getCompletions();
-    let savedAchievements = localStorageService.getAchievements();
-    
-    if (savedAchievements.length === 0) {
-      savedAchievements = INITIAL_ACHIEVEMENTS.map(a => ({ ...a, unlocked: false }));
-      localStorageService.saveAchievements(savedAchievements);
-    }
-    
-    setHabits(savedHabits);
-    setCompletions(savedCompletions);
-    setAchievements(savedAchievements);
+    const loadData = async () => {
+      const savedHabits = await storageService.getHabits();
+      const savedCompletions = await storageService.getCompletions();
+      let savedAchievements = await storageService.getAchievements();
+
+      if (savedAchievements.length === 0) {
+        savedAchievements = INITIAL_ACHIEVEMENTS.map(a => ({ ...a, unlocked: false }));
+        await storageService.saveAchievements(savedAchievements);
+      }
+
+      setHabits(savedHabits);
+      setCompletions(savedCompletions);
+      setAchievements(savedAchievements);
+    };
+
+    loadData();
   }, []);
 
   const checkAchievements = (updatedHabits: Habit[], updatedCompletions: Completion[]) => {
@@ -88,7 +92,7 @@ export default function HabitsPage({ onTabChange }: HabitsPageProps) {
 
     if (hasNewAchievement) {
       setAchievements(newAchievements);
-      localStorageService.saveAchievements(newAchievements);
+      storageService.saveAchievements(newAchievements);
     }
   };
 
@@ -105,7 +109,7 @@ export default function HabitsPage({ onTabChange }: HabitsPageProps) {
     };
     const updated = [...habits, newHabit];
     setHabits(updated);
-    localStorageService.saveHabits(updated);
+    storageService.saveHabits(updated);
     checkAchievements(updated, completions);
   };
 
@@ -114,17 +118,17 @@ export default function HabitsPage({ onTabChange }: HabitsPageProps) {
       h.id === id ? { ...h, title, description, frequencyType, customDays } : h
     );
     setHabits(updated);
-    localStorageService.saveHabits(updated);
+    storageService.saveHabits(updated);
   };
 
   const deleteHabit = (id: string) => {
     const updated = habits.filter(h => h.id !== id);
     setHabits(updated);
-    localStorageService.saveHabits(updated);
+    storageService.saveHabits(updated);
     
     const updatedCompletions = completions.filter(c => c.habitId !== id);
     setCompletions(updatedCompletions);
-    localStorageService.saveCompletions(updatedCompletions);
+    storageService.saveCompletions(updatedCompletions);
   };
 
   const calculateStreak = (habitId: string, newCompletions: Completion[]): { current: number; best: number } => {
@@ -187,14 +191,14 @@ export default function HabitsPage({ onTabChange }: HabitsPageProps) {
     }
 
     setCompletions(updated);
-    localStorageService.saveCompletions(updated);
+    storageService.saveCompletions(updated);
 
     const { current, best } = calculateStreak(habitId, updated);
     const updatedHabits = habits.map(h =>
       h.id === habitId ? { ...h, currentStreak: current, bestStreak: best } : h
     );
     setHabits(updatedHabits);
-    localStorageService.saveHabits(updatedHabits);
+    storageService.saveHabits(updatedHabits);
 
     const completion = updated.find(c => c.habitId === habitId && c.date === today);
     if (completion?.completed) {

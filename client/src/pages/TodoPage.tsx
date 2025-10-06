@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AddTodoDialog } from "@/components/AddTodoDialog";
 import { EditTodoDialog } from "@/components/EditTodoDialog";
 import { TodoCard } from "@/components/TodoCard";
-import { localStorageService } from "@/lib/storage";
+import { storageService } from "@/lib/storage";
 import type { Todo, InsertTodo } from "@shared/schema";
 import { Calendar, ListTodo } from "lucide-react";
 import { format, startOfWeek, endOfWeek, startOfDay, endOfDay, parseISO } from "date-fns";
@@ -23,13 +23,16 @@ const TodoPage = () => {
   const [filterCategory, setFilterCategory] = useState<FilterCategory>("All");
 
   useEffect(() => {
-    const savedTodos = localStorageService.getTodos();
-    setTodos(savedTodos);
+    const loadTodos = async () => {
+      const savedTodos = await storageService.getTodos();
+      setTodos(savedTodos);
+    };
+    loadTodos();
   }, []);
 
   const saveTodos = (newTodos: Todo[]) => {
     setTodos(newTodos);
-    localStorageService.saveTodos(newTodos);
+    storageService.saveTodos(newTodos);
   };
 
   const handleAddTodo = (insertTodo: InsertTodo) => {

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import AchievementCard from "@/components/AchievementCard";
 import EmptyState from "@/components/EmptyState";
-import { localStorageService } from "@/lib/storage";
+import { storageService } from "@/lib/storage";
 import { INITIAL_ACHIEVEMENTS } from "@/lib/achievements";
 import type { Achievement } from "@shared/schema";
 
@@ -10,12 +10,15 @@ export default function AchievementsPage() {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
 
   useEffect(() => {
-    let savedAchievements = localStorageService.getAchievements();
-    if (savedAchievements.length === 0) {
-      savedAchievements = INITIAL_ACHIEVEMENTS.map(a => ({ ...a, unlocked: false }));
-      localStorageService.saveAchievements(savedAchievements);
-    }
-    setAchievements(savedAchievements);
+    const loadAchievements = async () => {
+      let savedAchievements = await storageService.getAchievements();
+      if (savedAchievements.length === 0) {
+        savedAchievements = INITIAL_ACHIEVEMENTS.map(a => ({ ...a, unlocked: false }));
+        await storageService.saveAchievements(savedAchievements);
+      }
+      setAchievements(savedAchievements);
+    };
+    loadAchievements();
   }, []);
 
   const unlockedAchievements = achievements.filter(a => a.unlocked);

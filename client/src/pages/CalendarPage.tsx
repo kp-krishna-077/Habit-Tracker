@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import CalendarView from "@/components/CalendarView";
 import EmptyState from "@/components/EmptyState";
-import { localStorageService } from "@/lib/storage";
+import { storageService } from "@/lib/storage";
 import type { Habit, Completion } from "@shared/schema";
 
 export default function CalendarPage() {
@@ -11,13 +11,16 @@ export default function CalendarPage() {
   const [selectedHabitId, setSelectedHabitId] = useState<string>("");
 
   useEffect(() => {
-    const savedHabits = localStorageService.getHabits();
-    const savedCompletions = localStorageService.getCompletions();
-    setHabits(savedHabits);
-    setCompletions(savedCompletions);
-    if (savedHabits.length > 0 && !selectedHabitId) {
-      setSelectedHabitId(savedHabits[0].id);
-    }
+    const loadData = async () => {
+      const savedHabits = await storageService.getHabits();
+      const savedCompletions = await storageService.getCompletions();
+      setHabits(savedHabits);
+      setCompletions(savedCompletions);
+      if (savedHabits.length > 0 && !selectedHabitId) {
+        setSelectedHabitId(savedHabits[0].id);
+      }
+    };
+    loadData();
   }, []);
 
   const selectedHabit = habits.find(h => h.id === selectedHabitId);

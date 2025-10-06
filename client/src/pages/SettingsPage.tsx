@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Trash2, Download, Upload, FileText } from "lucide-react";
 import { useState, useEffect } from "react";
-import { localStorageService } from "@/lib/storage";
+import { storageService } from "@/lib/storage";
 import { exportHabitsToPDF } from "@/lib/pdfExport";
 import { useToast } from "@/hooks/use-toast";
 
@@ -23,18 +23,18 @@ export default function SettingsPage() {
     setDarkMode(checked);
     if (checked) {
       document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
+      storageService.saveTheme("dark");
     } else {
       document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
+      storageService.saveTheme("light");
     }
   };
 
-  const exportData = () => {
+  const exportData = async () => {
     const data = {
-      habits: localStorageService.getHabits(),
-      completions: localStorageService.getCompletions(),
-      achievements: localStorageService.getAchievements(),
+      habits: await storageService.getHabits(),
+      completions: await storageService.getCompletions(),
+      achievements: await storageService.getAchievements(),
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -50,9 +50,9 @@ export default function SettingsPage() {
     });
   };
 
-  const exportPDF = () => {
-    const habits = localStorageService.getHabits();
-    const completions = localStorageService.getCompletions();
+  const exportPDF = async () => {
+    const habits = await storageService.getHabits();
+    const completions = await storageService.getCompletions();
     
     if (habits.length === 0) {
       toast({
@@ -79,12 +79,12 @@ export default function SettingsPage() {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = (event) => {
+        reader.onload = async (event) => {
           try {
             const data = JSON.parse(event.target?.result as string);
-            if (data.habits) localStorageService.saveHabits(data.habits);
-            if (data.completions) localStorageService.saveCompletions(data.completions);
-            if (data.achievements) localStorageService.saveAchievements(data.achievements);
+            if (data.habits) await storageService.saveHabits(data.habits);
+            if (data.completions) await storageService.saveCompletions(data.completions);
+            if (data.achievements) await storageService.saveAchievements(data.achievements);
             
             toast({
               title: "Import successful",
@@ -104,8 +104,11 @@ export default function SettingsPage() {
     input.click();
   };
 
-  const confirmClearData = () => {
-    localStorage.clear();
+  const confirmClearData = async () => {
+    await storageService.saveHabits([]);
+    await storageService.saveCompletions([]);
+    await storageService.saveAchievements([]);
+    await storageService.saveTodos([]);
     toast({
       title: "Data cleared",
       description: "All data has been cleared. Please refresh the page.",
