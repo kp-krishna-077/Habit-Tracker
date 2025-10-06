@@ -33,8 +33,15 @@ function App() {
       const habits = await storageService.getHabits();
       habits.forEach(habit => {
         if (habit.reminderTime === currentTime && habit.reminderDate === currentDate) {
-          new Notification("Habit Reminder", {
-            body: `Don't forget to complete your habit: ${habit.title}`,
+          fetch("/api/send-notification", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              title: "Habit Reminder",
+              body: `Don't forget to complete your habit: ${habit.title}`,
+            }),
           });
         }
       });
@@ -42,8 +49,15 @@ function App() {
       const todos = await storageService.getTodos();
       todos.forEach(todo => {
         if (todo.dueTime === currentTime && todo.dueDate === currentDate) {
-          new Notification("To-Do Reminder", {
-            body: `Your task is due: ${todo.title}`,
+          fetch("/api/send-notification", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              title: "To-Do Reminder",
+              body: `Your task is due: ${todo.title}`,
+            }),
           });
         }
       });
